@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the plugin version
+        run: |
+          VERSION=$(jq -r .version mcp-demo/.claude-plugin/plugin.json)
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match plugin version $VERSION"
+            exit 1
+          fi
+
+      - name: Bundle the plugin
+        run: |
+          mkdir dist
+          (cd mcp-demo && zip -r "../dist/mcp-demo-$GITHUB_REF_NAME.zip" .)
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip --generate-notes

@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/protect-files.sh",
+            "statusMessage": "Checking protected files..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"This Hook is from the Plugin (PreToolUse).\"}'",
+            "statusMessage": "Running PreToolUse demo hook..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"This Hook is from the Plugin (PostToolUse).\"}'",
+            "statusMessage": "Running PostToolUse demo hook..."
+          }
+        ]
+      }
+    ]
+  }
+}

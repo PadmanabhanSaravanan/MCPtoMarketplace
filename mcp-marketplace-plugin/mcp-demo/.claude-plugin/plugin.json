@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "mcp-demo",
+  "displayName": "MCP Demo",
+  "version": "1.0.0",
+  "description": "A demo MCP server with add, get-energy-prices, get-todos, and a greeting resource.",
+  "author": { "name": "Course Team" },
+  "license": "MIT",
+  "keywords": ["mcp", "demo", "course"]
+}

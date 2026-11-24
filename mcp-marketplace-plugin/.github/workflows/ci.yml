@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install the Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate the marketplace and plugins
+        run: |
+          claude plugin validate . --strict
+          claude plugin validate ./mcp-demo --strict
+          claude plugin validate ./todo-toolkit --strict
+
+      - name: Smoke-test the MCP server
+        run: uv run --with "mcp>=2.0.0" tests/smoke_test.py mcp-demo/server/server.py
