@@ -22,7 +22,7 @@ GitHub repository  ── .claude-plugin/marketplace.json makes it a marketplace
         └─ Release workflow  bundles the plugin and creates a GitHub Release on a version tag
         │
         ▼
-/plugin marketplace add <github-user>/course-plugins
+/plugin marketplace add <github-user>/mcp-marketplace-plugin
 ```
 
 > **Note:** *SSE* (Server-Sent Events) was the original HTTP transport for MCP. The current spec replaces it with *Streamable HTTP*, which still streams responses with SSE when needed. This guide uses Streamable HTTP, which is what your server already does.
@@ -78,15 +78,16 @@ Run the server as it is today, so you know what you are starting from.
 
 > **Warning:** Always use a virtual environment here. A global Python may have `mcp` 1.x installed, which has no `MCPServer` class. You then get `ImportError: cannot import name 'MCPServer'`. `requirements.txt` asks for `mcp>=2.0.0`.
 
-## Part 2: Create the marketplace repository folder
+## Part 2: Set up the marketplace repository folder
 
-Build the plugin in a **working folder outside the course repository**, such as `MCPtoMarketplace`. A marketplace must sit at the root of its own GitHub repository, so you create a `course-plugins` subfolder that becomes that repository. This guide stays beside it, outside what you publish, and the course repository's `.env` files stay out too.
+Work in a **working folder outside the course repository**, `MCPtoMarketplace`. A marketplace must sit at the root of its own GitHub repository, so the `mcp-marketplace-plugin` subfolder of the working folder is the repository you publish. This guide (`README.md`) stays beside it, outside what you publish.
 
-1. Open a terminal in your working folder and copy the existing marketplace into a `course-plugins` subfolder.
+The `mcp-marketplace-plugin` folder already holds the marketplace catalog and the `todo-toolkit` plugin. You add the `mcp-demo` plugin, the tests, and the workflows.
+
+1. Open a terminal in the working folder and go into the repository folder.
 
    ```powershell
-   Copy-Item -Recurse <path-to>\ClaudeCode\18-plugins .\course-plugins
-   cd .\course-plugins
+   cd .\mcp-marketplace-plugin
    ```
 
 2. Create the new folders.
@@ -95,7 +96,7 @@ Build the plugin in a **working folder outside the course repository**, such as 
    New-Item -ItemType Directory -Force mcp-demo\.claude-plugin, mcp-demo\server, tests, .github\workflows
    ```
 
-3. Create a `.gitignore` file in the repository root.
+3. Check that a `.gitignore` file exists in the repository root. If not, create it.
 
    ```text
    .env
@@ -104,19 +105,28 @@ Build the plugin in a **working folder outside the course repository**, such as 
    dist/
    ```
 
-You now have this layout:
+By the end of the guide you have this layout:
 
 ```text
-course-plugins/
-├── .claude-plugin/marketplace.json     # the catalog (already exists)
-├── .github/workflows/                  # CI and release (Parts 9 and 10)
-├── mcp-demo/                           # the new plugin
-│   ├── .claude-plugin/plugin.json
-│   ├── .mcp.json
-│   └── server/server.py
-├── todo-toolkit/                       # the existing plugin
-└── tests/
+MCPtoMarketplace/
+├── README.md                           # this guide (not published)
+└── mcp-marketplace-plugin/             # the repository you publish
+    ├── .claude-plugin/marketplace.json # the catalog, named mcp-marketplace-demo
+    ├── .github/workflows/              # CI and release (Parts 9 and 10)
+    │   ├── ci.yml
+    │   └── release.yml
+    ├── .gitignore
+    ├── mcp-demo/                       # the new plugin
+    │   ├── .claude-plugin/plugin.json
+    │   ├── .mcp.json
+    │   └── server/server.py
+    ├── todo-toolkit/                   # the existing plugin
+    └── tests/
+        ├── smoke_test.py
+        └── http_check.py
 ```
+
+> **Note:** The repository folder name and the marketplace name differ on purpose. `mcp-marketplace-plugin` is the folder and GitHub repository. `mcp-marketplace-demo` is the `name` in `marketplace.json`, which you type after `@` when installing.
 
 ## Part 3: Add the stdio transport to the server
 
@@ -401,14 +411,14 @@ Test before you publish, so a mistake costs you a restart and not a release.
 
 ## Part 7: Publish to GitHub
 
-1. Create an empty repository named `course-plugins` on github.com. Leave **Add a README** and **.gitignore** unchecked.
+1. Create an empty repository named `mcp-marketplace-plugin` on github.com. Leave **Add a README** and **.gitignore** unchecked.
 2. Commit and push your folder.
 
    ```powershell
    git init -b main
    git add .
    git commit -m "Add mcp-demo plugin and marketplace"
-   git remote add origin https://github.com/<github-user>/course-plugins.git
+   git remote add origin https://github.com/<github-user>/mcp-marketplace-plugin.git
    git push -u origin main
    ```
 
@@ -422,7 +432,7 @@ Test before you publish, so a mistake costs you a restart and not a release.
 2. Add your marketplace.
 
    ```text
-   /plugin marketplace add <github-user>/course-plugins
+   /plugin marketplace add <github-user>/mcp-marketplace-plugin
    ```
 
 3. Install the plugin.
@@ -565,7 +575,7 @@ Check each line before you call the exercise done.
 - [ ] `uv run --with "mcp>=2.0.0" tests/smoke_test.py mcp-demo/server/server.py` prints `PASS`
 - [ ] `claude plugin validate . --strict` prints `✔ Validation passed`
 - [ ] The CI run on GitHub is green
-- [ ] `/plugin marketplace add <github-user>/course-plugins` succeeds in a clean session
+- [ ] `/plugin marketplace add <github-user>/mcp-marketplace-plugin` succeeds in a clean session
 - [ ] `/mcp` shows `plugin:mcp-demo:demo` as connected
 - [ ] A release tag produced a `.zip` on the Releases page
 
