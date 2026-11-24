@@ -451,7 +451,7 @@ CI runs your checks on every push and pull request, so a broken manifest never r
 
    on:
      push:
-       branches: [main]
+       branches: [main, master]
      pull_request:
 
    jobs:
@@ -545,7 +545,7 @@ A release does two jobs: it freezes a version of the plugin, and it attaches a d
 ### Cut a release
 
 1. Change `version` in `mcp-demo/.claude-plugin/plugin.json` to the new number, for example `1.1.0`.
-2. Commit, tag, and push.
+2. Commit the change, then tag that commit, then push both.
 
    ```powershell
    git add mcp-demo/.claude-plugin/plugin.json
@@ -555,8 +555,18 @@ A release does two jobs: it freezes a version of the plugin, and it attaches a d
    git push origin v1.1.0
    ```
 
-3. Open the **Releases** page on GitHub. Check that `v1.1.0` has an `mcp-demo-v1.1.0.zip` attachment.
-4. Update the installed plugin in Claude Code.
+   > **Warning:** Create the tag **after** the commit that bumps the version. A tag points at one specific commit, and the release workflow checks out that commit. If you tag first and bump afterwards, the tag still holds the old `version` and the version check fails.
+
+3. Check that the tag holds the new version before you rely on the workflow.
+
+   ```powershell
+   git show v1.1.0:mcp-demo/.claude-plugin/plugin.json | Select-String version
+   ```
+
+   Expected output: a line that says `"version": "1.1.0"`.
+
+4. Open the **Releases** page on GitHub. Check that `v1.1.0` has an `mcp-demo-v1.1.0.zip` attachment.
+5. Update the installed plugin in Claude Code.
 
    ```powershell
    claude plugin update mcp-demo
@@ -587,7 +597,7 @@ Check each line before you call the exercise done.
 | `/plugin` says `isn't available in this environment` | The session is non-interactive | Open Claude Code in an interactive terminal or the VS Code extension |
 | `marketplace add` cannot find the catalog | `marketplace.json` is not at the repository root | Move `.claude-plugin/` to the top level of the repository |
 | `claude plugin update` finds nothing | `version` was not bumped | Change `version` in `plugin.json` and push |
-| Release workflow fails at the version check | Tag and `plugin.json` version differ | Delete the tag, fix the version, and tag again |
+| Release workflow fails at the version check (`Tag v1.1.0 does not match plugin version 1.0.0`) | The tag points at a commit made before the version bump | Move the tag to the bump commit: `git tag -f v1.1.0 <commit>` then `git push origin v1.1.0 --force`. Nothing was released, because the workflow stops at this step |
 | Port 3000 is already in use | Another process holds the port | Pass `--port 3001` |
 
 ## Going further
